@@ -28,30 +28,55 @@ app.get("/users", (req, res) => {
 
 })
 
-app.put("/users", (req,res) => {
-    console.log("We came, we saw, we put put golfed");
-    res.send('Been there, done that.');
+// app.put("/users", (req,res) => {
+//     console.log("We came, we saw, we put put golfed");
+//     res.send('Been there, done that.');
+// });
+
+// app.delete("/users", (req,res)=> {
+//    console.log("My name a Borat, I not be delete");
+//    res.send("My name a Borat, I not be delete");
+// });
+
+
+app.get("/users", async (req, res) => {
+    const indexFile = await fs.readFile(path.resolve(__dirname, 'public', 'users.html'))
+        .catch(err => {
+            console.error(err);
+            //send error result - 500!
+            res.setHeader('Content-Type', 'text/html');
+            return res.status(500).send("Error occurred", err);
+
+        });
+
+    return res.status(200).send(indexFile);
 });
 
-app.delete("/users", (req,res)=> {
-   console.log("My name a Borat, I not be delete");
-   res.send("My name a Borat, I not be delete");
+app.post("/users", (req, res) => {
+    setTimeout(()=> {
+        res.status(200).send("POST To Users Waited 3 Seconds");
+    }, 3000);
+
 });
 
-/*
+app.put("/users", (req, res) => {
+    setTimeout(()=> {
+        res.status(200).send("PUT To Users Waited 2 Seconds");
+    }, 2000);
+});
 
-app.get('/users", (req, res) => {
+app.delete("/users/:userID", (req,res) => {
+    let randomResult = Math.random() < 0.50 ? true : false;
+    console.log(randomResult + " is random result");
+    if(randomResult === true) {
+        res.status(200).send(`User ${req.params['userID']} deleted`)
+    } else {
+        setTimeout(()=> {
+            res.status(500).send(`user ${req.params['userID']} NOT FOUND!`)
+        }, 2000)
+    }
+});
 
-}
-
-app.post('/users", (req, res) => {
-
-}
-
-app.put('/users", (req, res) => {
-
-}
- */
 
 app.get("/", async (req, res) => {
 
