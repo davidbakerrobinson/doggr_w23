@@ -37,11 +37,29 @@ export class Route {
         return this;
     }
 
+    put(handler) {
+        const ph = new PathHandler("/", handler);
+        ph.method = "put";
+
+        this.methods['put'] = true;
+        this.stack.push(ph);
+        return this;
+    }
+
     post(handler) {
         const ph = new PathHandler("/", handler);
         ph.method = "post";
 
         this.methods['post'] = true;
+        this.stack.push(ph);
+        return this;
+    }
+
+    delete(handler) {
+        const ph = new PathHandler("/", handler);
+        ph.method = "delete";
+
+        this.methods['delete'] = true;
         this.stack.push(ph);
         return this;
     }

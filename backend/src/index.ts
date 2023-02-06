@@ -9,7 +9,7 @@ import path from "path";
 import {Nastify} from "./nastify";
 //import { Fastify } from "./fastify";
 
-const app = Nastify();
+const app = new Nastify();
 
 console.log(app);
 
@@ -28,6 +28,15 @@ app.get("/users", (req, res) => {
 
 })
 
+app.put("/users", (req,res) => {
+    console.log("We came, we saw, we put put golfed");
+    res.send('Been there, done that.');
+});
+
+app.delete("/users", (req,res)=> {
+   console.log("My name a Borat, I not be delete");
+   res.send("My name a Borat, I not be delete");
+});
 
 /*
 

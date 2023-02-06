@@ -61,6 +61,17 @@ export class Router {
         return this;
     }
 
+    put(path, handler) {
+        const route = this.createRoute(path);
+        route.put(handler);
+        return this;
+    }
+
+    delete(path, handler) {
+        const route = this.createRoute(path);
+        route.delete(handler);
+    }
+
     post(path, handler) {
         const route = this.createRoute(path);
         route.post(handler);

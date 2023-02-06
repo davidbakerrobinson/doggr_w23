@@ -17,17 +17,21 @@ import {Router} from "./router/router";
 // -POST => execute MyPostFnHandler
 // Router => Route[] => PathHandler(Maps GET/POST to a specific function handler)
 
-export function Nastify() {
-    const middlewares = [];
-    const router = new Router();
+ export class Nastify {
+     middlewares:any;
+     router:Router;
+    constructor() {
+        this.middlewares = [];
+        this.router = new Router();
+    }
 
-    async function listen(port = 8080, cb) {
+    async listen(port = 8080, cb) {
         return http
             .createServer(async (req, res) => {
 
                 request(req);
                 response(res);
-                handleMiddleware(req, res, () => router.handle(req, res));
+                this.handleMiddleware(req, res, () => this.router.handle(req, res));
 
 
             }).listen({ port }, () => {
@@ -40,9 +44,9 @@ export function Nastify() {
             });
     }
 
-    function handleMiddleware(req, res, cb) {
+    handleMiddleware(req, res, cb) {
         req.handler = cb;
-        const next = findNext(req, res);
+        const next = this.findNext(req, res);
         next();
     }
 
@@ -53,12 +57,12 @@ export function Nastify() {
     middlewares => [ValidateInputs, DBSanitize]
     this.middlewares[0] => validateinputs
      */
-    function findNext(req, res) {
+    findNext(req, res) {
         let current = -1;
 
         const next = () => {
             current += 1;
-            const middleware = middlewares[current];
+            const middleware = this.middlewares[current];
 
             const { matched = false, params = {} }
                 = middleware ? matchPath(middleware.path, req.pathname) : {};
@@ -67,7 +71,7 @@ export function Nastify() {
                 console.log("Middleware for path found");
                 req.params = params;
                 middleware.handler(req, res, next);
-            } else if (current <= middlewares.length) {
+            } else if (current <= this.middlewares.length) {
                 next();
             } else {
                 // we're done with middleware execution
@@ -90,30 +94,42 @@ export function Nastify() {
     Code example
     app.use("/admin", AuthorizeUser);
      */
-    function use(...args) {
+    use(...args) {
        const { path, handler } = checkMiddlewareInputs(args);
 
-       middlewares.push({
+       this.middlewares.push({
            path,
            handler
        });
     }
 
-    function get(...args) {
+    get(...args) {
         const { path, handler } = checkMiddlewareInputs(args);
-        return router.get(path, handler);
+        return this.router.get(path, handler);
     }
-    function post(...args) {
+    post(...args) {
         const { path, handler } = checkMiddlewareInputs(args);
-        return router.post(path, handler);
+        return this.router.post(path, handler);
     }
 
-    return {
-        listen,
-        use,
-        get,
-        post
+    put(...args) {
+        const { path, handler } = checkMiddlewareInputs(args);
+        return this.router.put(path, handler);
     }
+
+    delete(...args) {
+        const { path, handler } = checkMiddlewareInputs(args);
+        return this.router.delete(path, handler);
+    }
+
+    // return {
+    //     listen,
+    //     use,
+    //     get,
+    //     post,
+    //     put,
+    //     _delete
+    // }
 }
 
 // let app = Nastify();
