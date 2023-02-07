@@ -7,6 +7,7 @@ import cors from "cors";
 import fs from "fs/promises";
 import path from "path";
 import {Nastify} from "./nastify";
+import axios from "axios";
 //import { Fastify } from "./fastify";
 
 const app = new Nastify();
@@ -15,6 +16,10 @@ console.log(app);
 
 app.use("/about", cors());
 app.use("/get", cors());
+app.use("/users/:userID", (req,res,next) => {
+    console.error(req.params['userID'].substring(1));
+    next();
+})
 
 app.get("/about", (req, res) => {
     res.send("I am the about page");
@@ -27,6 +32,19 @@ app.post("/about", (req, res) => {
 app.get("/users", (req, res) => {
 
 })
+
+app.get('/fetchRandomUser', async (req,res)=> {
+    let requestResponse;
+
+       requestResponse = await axios.get("https://randomuser.me/api").catch(err => {
+           return res.status(500).send("Error Occured")
+       });
+
+
+    //res.setHeader('Content-Type','application/json');
+    return res.status(200).send(requestResponse.toString());
+
+});
 
 // app.put("/users", (req,res) => {
 //     console.log("We came, we saw, we put put golfed");
@@ -67,12 +85,11 @@ app.put("/users", (req, res) => {
 
 app.delete("/users/:userID", (req,res) => {
     let randomResult = Math.random() < 0.50 ? true : false;
-    console.log(randomResult + " is random result");
     if(randomResult === true) {
-        res.status(200).send(`User ${req.params['userID']} deleted`)
+        res.status(200).send(`User ${req.params['userID'].substring(1)} deleted`)
     } else {
         setTimeout(()=> {
-            res.status(500).send(`user ${req.params['userID']} NOT FOUND!`)
+            res.status(500).send(`user ${req.params['userID'].substring(1)} NOT FOUND!`)
         }, 2000)
     }
 });
