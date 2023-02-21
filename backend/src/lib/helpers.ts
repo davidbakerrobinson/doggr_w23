@@ -1,12 +1,37 @@
+/** @module Helpers */
 import {dirname} from 'path';
 import {fileURLToPath} from 'url';
 
-// DIY __dirname since it's removed from ES Modules:
-// https://codingbeautydev.com/blog/javascript-dirname-is-not-defined-in-es-module-scope/
-export function getDirName(meta: any) {
+/**
+ * DIY __dirname since it's removed from ES Modules:
+ * https://codingbeautydev.com/blog/javascript-dirname-is-not-defined-in-es-module-scope/
+ * @function
+ * @param {ImportMeta} meta Fastify-provided import meta
+ */
+export function getDirName(meta: ImportMeta) {
 	const __filename = fileURLToPath(meta.url);
 
 	return dirname(__filename);
+}
+
+/**
+ * Determines which mode to start Doggr backend in
+ */
+export enum RunMode {
+	LISTEN,
+	SEED
+}
+
+/**
+ * Gets execution mode from command line args
+ * @returns {RunMode.LISTEN | RunMode.SEED}
+ */
+export function getModeFromArgs() {
+	if (process.argv[2] === "-seed") {
+		return RunMode.SEED;
+	} else {
+		return RunMode.LISTEN;
+	}
 }
 
 // in-source testing
@@ -27,3 +52,4 @@ if (import.meta.vitest) {
 		});
 	});
 }
+

@@ -1,9 +1,12 @@
 // @ts-nocheck
+// noinspection JSUnusedGlobalSymbols
+
 import * as path from "path";
 import {loadEnv} from "vite";
 import {VitePluginNode} from "vite-plugin-node";
 import {configDefaults, defineConfig, UserConfig as VitestUserConfigInterface} from "vitest/config";
 import {getDirName} from "./src/lib/helpers";
+import dts from "vite-plugin-dts";
 
 // Gets us fancy typing/intellisense during dev
 const vitestConfig: VitestUserConfigInterface = {
@@ -13,6 +16,9 @@ const vitestConfig: VitestUserConfigInterface = {
 		reporters: "verbose",
 		include: ["./test/**/*.{test,spec}.{ts,mts,cts,tsx}"],
 		includeSource: ["src/**/*.ts", "src/"],
+		onConsoleLog(_log, _type) {
+			return true;
+		}
 	},
 };
 
@@ -28,7 +34,15 @@ export default defineConfig({
 	build: {
 		emptyOutDir: true,
 		outDir: "build",
-		target: "esnext",
+		target: "modules",
+		rollupOptions: {
+
+			output: {
+				manualChunks: {
+
+				}
+			}
+		}
 	},
 	// For html/css/etc files that get copied as-is, rather than compiled, during a build
 	publicDir: "./public",
@@ -37,20 +51,20 @@ export default defineConfig({
 		port: env.VITE_PORT,
 	},
 	plugins: [
+		//dts(), // this will force-generate .d.ts files in build dir, occasionally useful for debugging
 		...VitePluginNode({
 			// Nodejs native Request adapter
 			adapter: "fastify",
 
 			// tell the plugin where is your project entry
-			appPath: "./src/server.ts",
+			appPath: "./src/index.ts",
 
 			// Optional, default: 'viteNodeApp'
 			// the name of named export of you app from the appPath file
 			// this has to match the last line in src/server.ts where we export our final app
 			exportName: "doggr",
 
-			// Optional, default: 'esbuild'
-			// Casey - I'm using swc because it's Rust based
+			// Optional, default: 'esbuild', using swc for TypeORM support
 			tsCompiler: "swc",
 		}),
 	],

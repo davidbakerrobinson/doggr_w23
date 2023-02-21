@@ -1,6 +1,7 @@
 FROM node:18-alpine AS base
 
-RUN npm i -g pnpm
+# TODO: replace http-server
+RUN npm i -g pnpm http-server
 
 # Stage 1 - download and prep dependencies
 FROM base AS dependencies
@@ -21,8 +22,11 @@ FROM base AS deploy
 WORKDIR /app
 COPY --from=build /app/build/ ./build/
 COPY --from=build /app/node_modules/ ./node_modules/
+# TODO: Replace this with a "real" http server (nginx) before prod!
+EXPOSE 8080
 
-EXPOSE 3000
+WORKDIR /app/build
+# This can be overridden with `docker run -it doggr/backend /bin/sh
+# Later will be removed, as this will be served by nginx
+CMD [ "http-server", "-p",  "8080", "." ]
 
-CMD [ "node", "build/server.js" ]
-# https://github.com/CaseyBaileyPDX/doggr_w23https://github.com/CaseyBaileyPDX/doggr_w23
