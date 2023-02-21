@@ -1,9 +1,9 @@
 import fs from "fs";
 
 const logDir = import.meta.env["VITE_LOGS_DIR"];
-
+console.log(`The path name is: ${logDir}`);
 // Create directory to store logs if it doesn't exist
-if (!fs.existsSync(logDir)) {
+if (logDir == undefined || !fs.existsSync(logDir)) {
 	fs.mkdirSync(logDir, {recursive: true});
 }
 

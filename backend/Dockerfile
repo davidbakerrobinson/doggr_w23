@@ -24,5 +24,5 @@ COPY --from=build /app/node_modules/ ./node_modules/
 
 EXPOSE 3000
 
-CMD [ "node", "build/index.js" ]
-https://github.com/CaseyBaileyPDX/doggr_w23https://github.com/CaseyBaileyPDX/doggr_w23
+CMD [ "node", "build/server.js" ]
+# https://github.com/CaseyBaileyPDX/doggr_w23https://github.com/CaseyBaileyPDX/doggr_w23

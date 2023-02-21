@@ -1,5 +1,5 @@
 // This will let us use our basic middlewares now, then transition to hooks later
-import fastifyMiddie from "@fastify/middie";
+import fastifyMiddie  from "@fastify/middie";
 import staticFiles from "@fastify/static";
 import Fastify from "fastify";
 import path from "path";

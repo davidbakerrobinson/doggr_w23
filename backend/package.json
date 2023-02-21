@@ -8,7 +8,7 @@
     "dev": "vite --mode development",
     "debug": "vite-node src/server.ts",
     "build": "vite build",
-    "start": "node build/index.js",
+    "start": "node build/server.js",
     "lint": "eslint . --ext .ts",
     "test": "vitest --passWithNoTests",
     "test:ui": "vitest --ui",
@@ -34,7 +34,8 @@
     "fastify": "^4.11.0",
     "fastify-cors": "^6.1.0",
     "fastify-env": "^2.2.0",
-    "pino": "^8.8.0"
+    "pino": "^8.8.0",
+    "pnpm": "^7.27.1"
   },
   "devDependencies": {
     "@swc/cli": "^0.1.60",
