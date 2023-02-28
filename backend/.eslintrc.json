@@ -23,7 +23,7 @@
     "max-len": [
       "error",
       {
-        "code": 250
+        "code": 350
       }
     ],
     "indent": [

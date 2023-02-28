@@ -3,7 +3,7 @@ import {
 	BaseEntity,
 	Column,
 	CreateDateColumn,
-	Entity, JoinTable,
+	Entity, JoinColumn, JoinTable,
 	ManyToMany,
 	ManyToOne, PrimaryColumn,
 	PrimaryGeneratedColumn,
@@ -19,7 +19,7 @@ import {Profile} from "./profile";
  * *So two ManytoOne keys
  */
 
-@Entity()
+@Entity({ name:'matches'})
 export class Matches extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
@@ -27,12 +27,15 @@ export class Matches extends BaseEntity {
     	cascade: true,
     	onDelete: "CASCADE"
     })
+	@JoinColumn()
     matcheeID: Relation<Profile>;
     @ManyToOne(() => Profile, (profile) => profile.swipedRight, {
     	cascade: true,
     	onDelete: "CASCADE"
     })
+	@JoinColumn()
     matcherID: Relation<Profile>;
+
 
     @CreateDateColumn()
     created_at: string;

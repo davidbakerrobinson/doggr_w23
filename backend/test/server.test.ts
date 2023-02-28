@@ -90,5 +90,29 @@ describe("Route testing", () => {
 			.toBeGreaterThanOrEqual(7);
 
 	});
+
+	it("Responds to Matches Post creation non-existent profileID properly", async () => {
+		const res = await app.inject({
+			method: "POST",
+			url: "/match",
+			payload: {
+				matcherId: -1,
+				matcheeId: -1
+			}
+		});
+
+		let message = JSON.parse(res.payload);
+		console.log("Message is: " + message);
+		//let errorMessage = message.error;
+
+		expect(res.statusCode)
+			.toBe(416);
+		expect(message.errorMessage)
+			.toBe("Could not find any entity of type \"Profile\" matching: {\n" +
+				"    \"where\": {\n" +
+				"        \"id\": -1\n" +
+				"    }\n" +
+				"}");
+	})
 });
 

@@ -6,6 +6,7 @@ import {Profile} from "../models/profile";
 import {User} from "../models/user";
 import {Matches} from "../models/matches";
 import {FastifyInstance} from "fastify";
+import {Matches1677293036162} from "../migrations/1677293036162-Matches";
 
 // note here that using faker makes testing a bit...hard
 // We can set a particular seed for faker, then use it later in our testing!
@@ -32,10 +33,15 @@ export class MatchesSeeder extends Seeder {
 		//have profile swipe right on profile found one index over
 		for (let i = 0; i < profiles.length; i++) {
 			let newMatch = new Matches();
-			let j = i % (profiles.length-1);
+			// let newMatch2 = new Matches();
+			let j = (i+5) % (profiles.length-1);
 			newMatch.matcherID = profiles[i];
 			newMatch.matcheeID = profiles[j];
 			await newMatch.save();
+			// let l = (i+2) % (profiles.length-1);
+			// newMatch2.matcherID = profiles[l];
+			// newMatch2.matcheeID = profiles[i];
+			// await newMatch2.save();
 			app.log.info("Finished seeding matcher: " + profiles[i]);
 		}
 	}

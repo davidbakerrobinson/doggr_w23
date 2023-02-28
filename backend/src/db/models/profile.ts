@@ -17,7 +17,7 @@ import {Matches} from "./matches";
  * Each profile corresponds to exactly 1 pet owned by a User.
  * This allows each user to have many pet profiles without needing to create more accounts
  */
-@Entity()
+@Entity({ name: 'profile'})
 export class Profile extends BaseEntity {
 	@PrimaryGeneratedColumn()
 	id: number;
@@ -37,10 +37,10 @@ export class Profile extends BaseEntity {
 	user: Relation<User>;
 
 	@OneToMany(()=>Matches, matches=>matches.matcherID)
-	swipedRight: Relation<Matches[]>
+	swipedRight: Relation<Matches[]>;
 
 	@OneToMany(()=>Matches,matches=>matches.matcheeID)
-	swipedRightOn: Relation<Matches[]>
+	swipedRightOn: Relation<Matches[]>;
 	@CreateDateColumn()
 	created_at: string;
 }

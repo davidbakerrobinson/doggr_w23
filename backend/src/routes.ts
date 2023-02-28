@@ -4,6 +4,9 @@ import {FastifyInstance, FastifyReply, FastifyRequest, RouteShorthandOptions} fr
 import {User} from "./db/models/user";
 import {IPHistory} from "./db/models/ip_history";
 import {Profile} from "./db/models/profile";
+import {Matches} from "./db/models/matches";
+import {EntityNotFoundError} from "typeorm";
+import * as repl from "repl";
 
 /**
  * App plugin where we construct our routes
@@ -34,6 +37,214 @@ export async function doggr_routes(app: FastifyInstance): Promise<void> {
 		reply.send(users);
 	});
 
+	app.get("/matches", async  (req,reply)=> {
+		let myAns = await app.db.matches.find({
+			relations: {
+				matcheeID: true,
+				matcherID: true
+			}
+		});
+
+		reply.send(myAns);
+	});
+	//CRUD impl for Matches
+	//Create new match
+
+	//I am a humble follower of the high priest
+	const post_matches_opts: RouteShorthandOptions = {
+		schema: {
+			body: {
+				type: 'object',
+				properties: {
+					matcherId: {type: 'number'},
+					matcheeId: {type: 'number'}
+				}
+			},
+			response: {
+				200: {
+					type: 'object',
+					properties: {
+						match: {type: 'object'}
+					}
+				},
+				416: {
+					type: 'object',
+					properties: {
+						errorMessage: {type: 'string'}
+					}
+				}
+			}
+		}
+	};
+	app.post<{
+		Body: MatchPostBody,
+		Reply: MatchPostReply
+	}>("/match", post_matches_opts ,async (req,reply: FastifyReply)=> {
+		const {matcherId, matcheeId} = req.body;
+
+		//need to test
+		try {
+			let matcheeProfile: Profile = await app.db.profile.findOneOrFail({
+				where: {
+					id: matcherId
+				}
+			});
+			let matcherProfile: Profile = await app.db.profile.findOneOrFail({
+				where: {
+					id: matcheeId
+				}
+			});
+			const match = new Matches();
+			match.matcherID = matcherProfile;
+			match.matcheeID = matcheeProfile;
+			await match.save();
+
+			await reply.send(JSON.stringify({match}));
+		} catch(e: any) {
+			reply.statusCode = 416;
+			await reply.send(JSON.stringify({errorMessage: e.message}));
+		}
+	});
+	/**
+	 * Delete specific match with given ids
+	 */
+
+	app.delete("/match/:matcherId/:matcheeId",async (req, reply: FastifyReply)=> {
+		const { matcherId, matcheeId } = req.params as MatchDeleteBody;
+		try {
+			let matchTableId = await app.db.matches.findOneOrFail({
+				relations: {
+					matcheeID: true,
+					matcherID: true
+				},
+				where: {
+					matcheeID: {
+						id: matcheeId
+					},
+					matcherID: {
+						id: matcherId
+					}
+				}
+			});
+			await app.db.matches.delete(matchTableId.id);
+			await reply.send(JSON.stringify({deletedMatch: matchTableId}));
+		} catch(err: any) {
+			await reply.send(`Could not delete because match not found with matcherID: ${matcherId} and matcheeID: ${matcheeId}`);
+		}
+	});
+
+	/**
+	 * provide type information for typescript
+	 */
+	interface MatchesDeleteRequest {
+		matcherId: number
+	}
+
+	/**
+	 * Delete all matches with the given matcherId
+	 */
+
+	app.delete<{
+		Params: MatchesDeleteRequest
+	}>("/matches/:matcherId", async (req, reply: FastifyReply) => {
+		const { matcherId } = req.params;
+		if(matcherId == undefined) {
+			return reply.status(400).send("matcherId must be a number");
+		}
+		//find those matches and delete accordingly
+		let matchesToDelete = await app.db.matches.find({
+			relations: {
+				matcherID: true,
+				matcheeID: true
+			},
+			where: {
+				matcherID: {
+					id: matcherId
+				}
+			}
+		});
+		await app.db.matches.remove(matchesToDelete);
+		return reply.status(200).send(JSON.stringify({matcherID: matcherId, deletedMatches: matchesToDelete}));
+
+	});
+
+
+
+
+
+	interface MatchQueryParam {
+		matcherId: number
+	}
+
+	/**
+	 * Get all of the matches that Include the matcherId as the person who swipes right
+	 */
+
+	app.get("/match/:matcherId", async (req, reply: FastifyReply)=> {
+		const { matcherId } = req.params as MatchQueryParam;
+		if(matcherId == undefined) {
+			return reply.send("For Route match Query parameter must be matcherId");
+		}
+		try {
+			let matchedWith = await app.db.matches.find({
+				relations: {
+					matcherID: true,
+					matcheeID: true
+				},
+				where: {
+					matcherID: {
+						id: matcherId
+					}
+				}
+			});
+			let profileEntry = await app.db.profile.findOneOrFail({
+				where: {
+					id: matcherId
+				}
+			});
+			return reply.send(JSON.stringify({profile: profileEntry,selectedMatches: matchedWith}));
+		} catch(err: any) {
+			reply.statusCode = 416;
+			return reply.send(JSON.stringify({errorMessage: `Not able to find profile with id: ${matcherId}`}));
+		}
+	});
+
+	interface MatcheeQueryParam {
+		matcheeId: number
+	}
+
+	/**
+	 * Get all of the have that have the matcheeId as provided in the query
+	 */
+	app.get("/matchee/:matcheeId", async (req, reply: FastifyReply)=> {
+		const { matcheeId } = req.params as MatcheeQueryParam;
+		if(matcheeId == undefined) {
+			return reply.send("For Route matchee Query parameter must be matcheeId");
+		}
+		try {
+			let matchedWith = await app.db.matches.find({
+				relations: {
+					matcherID: true,
+					matcheeID: true
+				},
+				where: {
+					matcheeID: {
+						id: matcheeId
+					}
+				}
+			});
+			let profileEntry = await app.db.profile.findOneOrFail({
+				where: {
+					id: matcheeId
+				}
+			});
+			return reply.send(JSON.stringify({profile: profileEntry,selectedMatches: matchedWith}));
+		} catch(err: any) {
+			reply.statusCode = 416;
+			return reply.send(JSON.stringify({errorMessage: `Not able to find profile with id: ${matcheeId}`}));
+		}
+	});
+
 	// CRUD impl for users
 	// Create new user
 
@@ -58,6 +269,8 @@ export async function doggr_routes(app: FastifyInstance): Promise<void> {
 			}
 		}
 	};
+
+
 
 	/**
 	 * Route allowing creation of a new user.
@@ -162,4 +375,30 @@ export type IPostUsersResponse = {
 	 * IP Address user used to create account
 	 */
 	ip_address: string
+}
+
+interface  MatchPostBody {
+	matcherId: number,
+	matcheeId: number
+}
+
+export type MatchPostReply = {
+	match: Matches
+}
+
+interface MatchDeleteBody {
+	matcherId: number,
+	matcheeId: number
+}
+
+export type MatchDeleteReply = {
+	deletedMatch: Matches,
+}
+
+interface MatcherGetBody {
+	matcherId: number
+}
+
+export type MatcherGetReply = {
+	profileWithMatcherRole: Profile
 }
