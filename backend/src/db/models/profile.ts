@@ -11,6 +11,7 @@ import {
 } from "typeorm";
 import {User} from "./user";
 import {Matches} from "./matches";
+import {Messages} from "./messages";
 
 /**
  * Profile model - This is for interacting with the profile table
@@ -41,6 +42,11 @@ export class Profile extends BaseEntity {
 
 	@OneToMany(()=>Matches,matches=>matches.matcheeID)
 	swipedRightOn: Relation<Matches[]>;
+
+	@OneToMany(()=>Messages, (messages)=>messages.messageSender )
+	messageSenders: Relation<Messages[]>;
+	@OneToMany(()=>Messages, (messages)=>messages.messageReceiver)
+	messageReceivers: Relation<Messages[]>;
 	@CreateDateColumn()
 	created_at: string;
 }
