@@ -20,8 +20,6 @@
     "migration:create": "pnpm buildJS && typeorm migration:create",
     "migration:generate": "pnpm buildJS && typeorm migration:generate -d buildTypeorm/db/datasources/dev_datasource.js",
     "migration:revert": "pnpm buildJS && typeorm migration:revert -d buildTypeorm/db/datasources/dev_datasource.js",
-
-
     "seed": "vite-node src/index.ts -- -seed",
     "generateDocs": "pnpm jsdoc -r -d docs/ -c jsdoc.json src/",
     "gitSync": "pnpm typeorm:drop && pnpm migration:run && pnpm seed"

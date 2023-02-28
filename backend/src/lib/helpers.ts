@@ -14,6 +14,7 @@ export function getDirName(meta: ImportMeta) {
 	return dirname(__filename);
 }
 
+
 /**
  * Determines which mode to start Doggr backend in
  */

@@ -7,6 +7,8 @@ import {Profile} from "./db/models/profile";
 import {Matches} from "./db/models/matches";
 import {EntityNotFoundError} from "typeorm";
 import * as repl from "repl";
+import {Messages} from "./db/models/messages";
+import { getDirName } from "./lib/helpers";
 
 /**
  * App plugin where we construct our routes
@@ -355,9 +357,60 @@ export async function doggr_routes(app: FastifyInstance): Promise<void> {
 		await reply.send(JSON.stringify(res));
 	});
 
+	/*
+	Will put Messages routes here
+	 */
+	app.post<{
+		Body: MessagesPostBody,
+		Reply: MessagesPostReply,
+		Params: MessagePostParams
+	}>("/message/:messageSender/:messageReceiver", async(req,reply)=> {
+		const { messageSender, messageReceiver } = req.params;
+		const { message } = req.body;
+
+		let senderProfile: Profile = await app.db.profile.findOneOrFail({
+			where: {
+				id: messageSender
+			}
+		});
+		let receiverProfile: Profile = await app.db.profile.findOneOrFail({
+			where: {
+				id: messageReceiver
+			}
+		});
+		const newMessage = new Messages();
+		newMessage.message = message;
+		newMessage.messageSender = senderProfile;
+		newMessage.messageReceiver = receiverProfile;
+		await newMessage.save();
+		return reply.status(200).send({message: message});
+	});
+
+	app.get("/messages", async (req, reply)=> {
+		let allMessages = await app.db.messages.find({
+			relations: {
+				messageSender: true,
+				messageReceiver: true
+			}
+		});
+		reply.send(allMessages);
+	});
 }
 
 // Appease typescript request gods
+
+interface MessagesPostBody {
+	message: string
+}
+
+interface MessagePostParams {
+	messageSender: number,
+	messageReceiver: number
+}
+
+interface MessagesPostReply {
+	message: string
+}
 interface IPostUsersBody {
 	name: string,
 	email: string,
